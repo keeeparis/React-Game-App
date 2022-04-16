@@ -17,6 +17,7 @@ git init
 git checkout -b main
 git add -A
 
+git config --global --add safe.directory /github/workspace/dist
 git config --local user.email "githubActions"
 git config --local user.name "byKeeeparis"
 
