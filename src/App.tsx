@@ -1,74 +1,115 @@
-import { MouseEvent, useRef, useState } from 'react'
+import { MouseEvent, useCallback, useRef, useState } from 'react'
 import './App.scss'
-import Game from './game/Game'
 
 function App() {
-    const circleRef = useRef<HTMLDivElement>(null)
-    const redRef = useRef<HTMLDivElement>(null)
-    const blueRef = useRef<HTMLDivElement>(null)
-    const yellowRef = useRef<HTMLDivElement>(null)
-    const greenRef = useRef<HTMLDivElement>(null)
-    const roundRef = useRef<HTMLDivElement>(null)
-    const loseRef = useRef<HTMLDivElement>(null)
-    const audioRef = useRef<HTMLDivElement>(null)
+    const [round, setRound] = useState(0)
+    const [queue, setQueue] = useState<number[]>([])
+    const [level, setLevel] = useState('1500')
+    const [isActive, setIsActive] = useState(false)
+    const [clicksAmount, setClicksAmount] = useState(0)
 
-    const handleStartGame = () => {
-        new Game(
-            circleRef.current,
-            redRef.current, 
-            blueRef.current, 
-            yellowRef.current, 
-            greenRef.current,
-            roundRef.current,
-            loseRef.current,
-            audioRef.current
-        ).init()
+    const onStartGame = () => {
+        setRound(0)
+        setQueue([])
+        setIsActive(false)
+        onRoundStart()
     }
 
-    const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
-        e.currentTarget.classList.add('active')
+    const onRoundStart = () => {
+        setClicksAmount(0)
+        pushToQueue()
+        animate()
+    }
+    
+    const pushToQueue = () => setQueue(prev => [...prev, generateRandomNumber()])
+    
+    const generateRandomNumber = () => Math.floor((Math.random() * 4) + 1)
+
+    const animate = useCallback(() => {
+        setRound(prev => ++prev)
+        setIsActive(true)
+        console.log(queue)
+
+        // setTimeout(() => {
+        //     let i = 0
+
+        //     let interval = setInterval(() => {
+        //         lightUp(queue[i])
+        //         playSound(queue[i])
+    
+        //         i++
+        //         if (i >= queue.length) {
+        //             clearInterval(interval)
+        //             setIsActive(false)
+        //         }
+        //     }, +level)
+        // }, 500)
+    }, [queue])
+    
+    const lightUp = (e: number) => {
+        const btn = document.getElementById(e.toString())
+        btn?.classList.add('active')
+        setTimeout(() => {
+            btn?.classList.remove('active')
+        }, 250)
     }
 
-    const handleMouseUp = (e: MouseEvent<HTMLDivElement>) => {
-        e.currentTarget.classList.remove('active')
+    const playSound = (e: number) => {
+        (new Audio(`src/sounds/${e}.mp3`)).play()
     }
+ 
+
+
+
+
+
+    // const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
+    //     e.currentTarget.classList.add('active')
+    // }
+
+    // const handleMouseUp = (e: MouseEvent<HTMLDivElement>) => {
+    //     e.currentTarget.classList.remove('active')
+    // }
 
     return (
         <div className="App">
-            <div className='Circle' ref={circleRef}>
+            <div className='Circle'>
                 <div 
                     className='Red'
-                    onMouseDown={handleMouseDown}
-                    onMouseUp={handleMouseUp}  
-                    ref={redRef}
+                    // onMouseDown={handleMouseDown}
+                    // onMouseUp={handleMouseUp}  
                     data-tile={1}
-                    />
+                    id='1'
+                />
                 <div 
                     className='Blue'
-                    onMouseDown={handleMouseDown}
-                    onMouseUp={handleMouseUp}  
-                    ref={blueRef}
+                    // onMouseDown={handleMouseDown}
+                    // onMouseUp={handleMouseUp}  
                     data-tile={2}
+                    id='2'
                 />
                 <div 
                     className='Yellow'
-                    onMouseDown={handleMouseDown}
-                    onMouseUp={handleMouseUp}  
-                    ref={yellowRef}
+                    // onMouseDown={handleMouseDown}
+                    // onMouseUp={handleMouseUp}  
                     data-tile={3}
+                    id='3'
                 />
                 <div 
                     className='Green'
-                    onMouseDown={handleMouseDown}
-                    onMouseUp={handleMouseUp}  
-                    ref={greenRef}
+                    // onMouseDown={handleMouseDown}
+                    // onMouseUp={handleMouseUp}  
                     data-tile={4}
+                    id='4'
                 />
             </div>
             <div className='Data'>
                 <div>
-                    <h1 ref={roundRef}>Round: 0</h1>
-                    <button onClick={handleStartGame}>Start</button>
+                    <h1>Round: {round}</h1>
+                    <div>
+                        {queue}
+                    </div>
+                    <button onClick={onStartGame}>Start</button>
                 </div>
                 <div className='Options'>
                     <h2>Game Options</h2>
@@ -85,9 +126,9 @@ function App() {
                         <label htmlFor="light-only">Light Only</label>
                     </div>
                 </div>
-                <div className='Lose' ref={loseRef} />
+                <div className='Lose' />
             </div>
-            <div className='Audio' ref={audioRef} />
+            <div className='Audio' />
         </div>
     )
 }
