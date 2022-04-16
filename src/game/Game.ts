@@ -132,7 +132,11 @@ class Game {
     }
 
     playSound(tile: number) {
-        (new Audio(`./sounds/${tile}.mp3`)).play()
+        const audio = new Audio()
+        audio.src = `./sounds/${tile}.mp3`
+        audio.oncanplaythrough = () => audio.play()
+        // audio.play()
+        // (new Audio(`./sounds/${tile}.mp3`)).play()
     }
 }
 
