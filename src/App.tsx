@@ -10,7 +10,7 @@ function App() {
     const greenRef = useRef<HTMLDivElement>(null)
     const roundRef = useRef<HTMLDivElement>(null)
     const loseRef = useRef<HTMLDivElement>(null)
-    const audioRef = useRef<HTMLAudioElement>(null)
+    const audioRef = useRef<HTMLDivElement>(null)
 
     const handleStartGame = () => {
         new Game(
@@ -87,7 +87,7 @@ function App() {
                 </div>
                 <div className='Lose' ref={loseRef} />
             </div>
-            <audio className='Audio' autoPlay ref={audioRef}></audio>
+            <div className='Audio' ref={audioRef} />
         </div>
     )
 }

@@ -26,7 +26,7 @@ class Game {
     green: HTMLDivElement
     roundDiv: HTMLDivElement
     loseDiv: HTMLDivElement
-    audioDiv: HTMLAudioElement
+    audioDiv: HTMLDivElement
 
     round: number = 0
     active: boolean = true
@@ -59,6 +59,8 @@ class Game {
         this.circle.classList.remove('deactivated')
         this.tileArray.forEach(tile => {
             tile.onclick = this.registerClick(tile.dataset.tile)
+            // @ts-ignore
+            tile.onmousedown = () => this.playSound(+tile.dataset.tile)
         })
     }
 
@@ -127,10 +129,24 @@ class Game {
     }
 
     playSound(tile: number) {
-        this.audioDiv.innerHTML = `
-            <source src='src/sounds/${tile}.ogg' type='audio/ogg' />
-            <source src='src/sounds/${tile}.mp3' type='audio/mp3' />
-        `
+        while (this.audioDiv.firstChild) {
+            this.audioDiv.removeChild(this.audioDiv.firstChild)
+        }
+
+        const audio = document.createElement('audio')
+        audio.autoplay = true
+
+        const source1 = document.createElement('source')
+        source1.src = `src/sounds/${tile}.ogg`
+        source1.type = 'audio/ogg'
+        const source2 = document.createElement('source')
+        source2.src = `src/sounds/${tile}.mp3`
+        source2.type = 'audio/mp3'
+        
+        audio.appendChild(source1)
+        audio.appendChild(source2)
+
+        this.audioDiv.appendChild(audio)
     }
 
     /* GETTERS */
