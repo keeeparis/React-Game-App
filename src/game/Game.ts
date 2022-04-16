@@ -1,38 +1,34 @@
 class Game {
-    constructor(
-        circle: any, 
-        red: any, 
-        blue: any, 
-        yellow: any, 
-        green: any, 
-        round: any,
-        lose: any,
-        audio: any
-    ) {
-        this.circle = circle
-        this.red = red
-        this.blue = blue
-        this.yellow = yellow
-        this.green = green
-        this.roundDiv = round
-        this.loseDiv = lose
-        this.audioDiv = audio
-    }
-    
     circle: HTMLDivElement
-    red: HTMLDivElement
-    blue: HTMLDivElement
-    yellow: HTMLDivElement
-    green: HTMLDivElement
     roundDiv: HTMLDivElement
     loseDiv: HTMLDivElement
-    audioDiv: HTMLDivElement
+    todoDiv: HTMLDivElement
 
-    round: number = 0
-    active: boolean = true
-    sequence: number[] = []
+    constructor(
+        circle: any, 
+        round: any,
+        lose: any,
+        todo: any
+    ) {
+        this.circle = circle
+        this.roundDiv = round
+        this.loseDiv = lose
+        this.todoDiv = todo
+    }
+    
+    #level: string = '1500'  /* 1500 / 1000 / 400 */
+    #round: number = 0
+    #active: boolean = true
+    #sequence: number[] = []
     copySequence: number[] = []
-    tileArray: HTMLDivElement[] = []
+
+    set setLevel(lvl: string) {
+        this.#level = lvl
+    }
+
+    get getRound() {
+        return this.#round
+    }
 
     init() {
         this.loseDiv.classList.remove('visible')
@@ -40,24 +36,29 @@ class Game {
     }
     
     startGame() {
-        this.tileArray = [this.red, this.blue, this.yellow, this.green]
-        this.round = 0
-        this.sequence = []
+        this.#round = 0
+        this.#sequence = []
         this.copySequence = []
         this.newRound()
     }
 
     newRound() {
-        this.round += 1
-        this.roundDiv.innerText = `Round: ${this.round}`
-        this.sequence.push(this.randomNumber())
-        this.copySequence = this.sequence.slice(0)
-        this.animate(this.sequence)
+        this.#round += 1
+        this.roundDiv.innerText = `Round: ${this.#round}`
+        this.todoDiv.innerText = 'Listen...'
+
+        this.#sequence.push(this.randomNumber())
+        this.copySequence = this.#sequence.slice(0)
+        this.animate(this.#sequence)
     }
 
     activateBoard() {
         this.circle.classList.remove('deactivated')
-        this.tileArray.forEach(tile => {
+        this.todoDiv.innerText = 'Play!'
+
+        const tiles = document.querySelectorAll('.Tile')
+        tiles.forEach(tile => {
+            // @ts-ignore
             tile.onclick = this.registerClick(tile.dataset.tile)
             // @ts-ignore
             tile.onmousedown = () => this.playSound(+tile.dataset.tile)
@@ -72,28 +73,29 @@ class Game {
         return () => {
             const trueResponse = this.copySequence.shift()
             const actualResponse = +e
-            this.active = (trueResponse === actualResponse)
+            this.#active = (trueResponse === actualResponse)
             this.checkLose()
         }
     }
 
     checkLose() {
-        if (this.copySequence.length === 0 && this.active) {
+        if (this.copySequence.length === 0 && this.#active) {
             this.deactivateBoard()
             this.newRound()
-        } else if (!this.active) {
+        } else if (!this.#active) {
             this.deactivateBoard()
             this.endGame() 
         }
     }
 
     endGame() {
-        this.round = 0
-        this.roundDiv.innerText = `Round: ${this.round}`
         this.loseDiv.innerText = `
-            Wow! Your result is ${this.round}. 
+            Wow! Your result is ${this.#round}. 
             Don't Stop and Keep Playing!
         `
+        this.todoDiv.innerText = ''
+        this.#round = 0
+        this.roundDiv.innerText = `Round: ${this.#round}`
         this.loseDiv.classList.add('visible')
     }
 
@@ -104,56 +106,36 @@ class Game {
     }
 
     animate(sequence: number[]) {
-        let i = 0
-        let interval = setInterval(() => {
-            this.lightUp(sequence[i])
-            this.playSound(sequence[i])
-
-            i++
-            if (i >= sequence.length) {
-                clearInterval(interval)
-                this.activateBoard()
-            }
-        }, 600)
+        // Задаержка перед каждым раундом
+        setTimeout(() => {
+            let i = 0
+            let interval = setInterval(() => {
+                this.lightUp(sequence[i])
+                this.playSound(sequence[i])
+    
+                i++
+                if (i >= sequence.length) {
+                    clearInterval(interval)
+                    this.activateBoard()
+                }
+            }, +this.#level)
+        }, 400)
     }
 
     lightUp(tile: number) {
-        this.tileArray.forEach(element => {
-            if (element.dataset.tile && tile === +element.dataset.tile) {
-                element.classList.add('active')
-                setTimeout(() => {
-                    element.classList.remove('active')
-                }, 250)
-            }
-        })
+        const btn = document.getElementById(tile.toString())!
+        
+        btn.classList.add('active')
+        setTimeout(() => {
+            btn.classList.remove('active')
+        }, 250)
     }
 
     playSound(tile: number) {
-        while (this.audioDiv.firstChild) {
-            this.audioDiv.removeChild(this.audioDiv.firstChild)
-        }
-
-        const audio = document.createElement('audio')
-        audio.autoplay = true
-
-        const source1 = document.createElement('source')
-        source1.src = `src/sounds/${tile}.ogg`
-        source1.type = 'audio/ogg'
-        const source2 = document.createElement('source')
-        source2.src = `src/sounds/${tile}.mp3`
-        source2.type = 'audio/mp3'
-        
-        audio.appendChild(source1)
-        audio.appendChild(source2)
-
-        this.audioDiv.appendChild(audio)
-    }
-
-    /* GETTERS */
-
-    get getRound() {
-        return this.round
+        (new Audio(`./sounds/${tile}.mp3`)).play()
     }
 }
 
 export default Game
+
+export type GameClassType = InstanceType<typeof Game>

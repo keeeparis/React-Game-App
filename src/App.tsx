@@ -1,28 +1,22 @@
-import { MouseEvent, useRef, useState } from 'react'
+import { MouseEvent, useEffect, useRef, useState } from 'react'
+
+import Game, { GameClassType } from './game/Game'
 import './App.scss'
-import Game from './game/Game'
 
 function App() {
     const circleRef = useRef<HTMLDivElement>(null)
-    const redRef = useRef<HTMLDivElement>(null)
-    const blueRef = useRef<HTMLDivElement>(null)
-    const yellowRef = useRef<HTMLDivElement>(null)
-    const greenRef = useRef<HTMLDivElement>(null)
     const roundRef = useRef<HTMLDivElement>(null)
     const loseRef = useRef<HTMLDivElement>(null)
-    const audioRef = useRef<HTMLDivElement>(null)
+    const todoRef = useRef<HTMLDivElement>(null)
+
+    let gameRef = useRef<GameClassType>(undefined!)
 
     const handleStartGame = () => {
-        new Game(
-            circleRef.current,
-            redRef.current, 
-            blueRef.current, 
-            yellowRef.current, 
-            greenRef.current,
-            roundRef.current,
-            loseRef.current,
-            audioRef.current
-        ).init()
+        gameRef.current.init()
+    }
+
+    const handleLevelChange = (e: any) => {
+        gameRef.current.setLevel = e.target.value
     }
 
     const handleMouseDown = (e: MouseEvent<HTMLDivElement>) => {
@@ -33,36 +27,45 @@ function App() {
         e.currentTarget.classList.remove('active')
     }
 
+    useEffect(() => {
+        gameRef.current = new Game(
+            circleRef.current,
+            roundRef.current,
+            loseRef.current,
+            todoRef.current
+        )
+    }, [])
+
     return (
         <div className="App">
             <div className='Circle' ref={circleRef}>
                 <div 
-                    className='Red'
+                    className='Red Tile'
                     onMouseDown={handleMouseDown}
                     onMouseUp={handleMouseUp}  
-                    ref={redRef}
                     data-tile={1}
-                    />
+                    id='1'
+                />
                 <div 
-                    className='Blue'
+                    className='Blue Tile'
                     onMouseDown={handleMouseDown}
                     onMouseUp={handleMouseUp}  
-                    ref={blueRef}
                     data-tile={2}
+                    id='2'
                 />
                 <div 
-                    className='Yellow'
+                    className='Yellow Tile'
                     onMouseDown={handleMouseDown}
                     onMouseUp={handleMouseUp}  
-                    ref={yellowRef}
                     data-tile={3}
+                    id='3'
                 />
                 <div 
-                    className='Green'
+                    className='Green Tile'
                     onMouseDown={handleMouseDown}
                     onMouseUp={handleMouseUp}  
-                    ref={greenRef}
                     data-tile={4}
+                    id='4'
                 />
             </div>
             <div className='Data'>
@@ -70,24 +73,24 @@ function App() {
                     <h1 ref={roundRef}>Round: 0</h1>
                     <button onClick={handleStartGame}>Start</button>
                 </div>
-                <div className='Options'>
+                <div className='Options' onChange={handleLevelChange}>
                     <h2>Game Options</h2>
                     <div className='Option'>
-                        <input type="radio" name="game" id="normal" />
+                        <input type="radio" name="game" id="normal" value='1500' defaultChecked  />
                         <label htmlFor="normal">Normal</label>
                     </div>
                     <div className='Option'>
-                        <input type="radio" name="game" id="sound-only" />
-                        <label htmlFor="sound-only">Sound Only</label>
+                        <input type="radio" name="game" id="Hard" value='1000' />
+                        <label htmlFor="sound-only">Hard</label>
                     </div>
                     <div className='Option'>
-                        <input type="radio" name="game" id="light-only" />
-                        <label htmlFor="light-only">Light Only</label>
+                        <input type="radio" name="game" id="Insane" value='400' />
+                        <label htmlFor="light-only">Insane</label>
                     </div>
                 </div>
                 <div className='Lose' ref={loseRef} />
+                <p className='Todo' ref={todoRef} />
             </div>
-            <div className='Audio' ref={audioRef} />
         </div>
     )
 }
